@@ -2,19 +2,21 @@ package main
 
 import (
 	"fmt"
-	"github.com/nomadcoders/nomadcoin/blockchain"
+	"log"
+	"net/http"
 )
 
-func main() {
-	chain := blockchain.GetBlockchain()
-	chain.AddBlock("Second Block")
-	chain.AddBlock("Third Block")
-	chain.AddBlock("Fourth Block")
+const port string = ":4000"
 
-	for _, block := range chain.AllBlocks() {
-		fmt.Printf("Data : %s\n", block.Data)
-		fmt.Printf("Hash : %s\n", block.Hash)
-		fmt.Printf("Prev Hash : %s\n", block.PrevHash)
-		fmt.Println("------------------")
-	}
+func home(rw http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(rw, "Hello from home")
+}
+
+func main() {
+	http.HandleFunc("/", home)
+
+	fmt.Printf("Listening on http://localhost%s\n", port)
+	// Fatal 안에 에러가오면 Exit(1)과 같이 프로세스 종료됨
+	log.Fatal(http.ListenAndServe(port, nil))
+
 }
