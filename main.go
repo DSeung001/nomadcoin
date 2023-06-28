@@ -8,7 +8,12 @@ import (
 	"net/http"
 )
 
-const port string = ":4000"
+const (
+	port       string = ":4000"
+	tempateDir string = "templates/"
+)
+
+var templates *template.Template
 
 type homeData struct {
 	// 여기 대소문자는 templates까지 영향을 줌
@@ -18,12 +23,18 @@ type homeData struct {
 
 func home(rw http.ResponseWriter, r *http.Request) {
 	// Must로 template 에러 핸들링
-	tmpl := template.Must(template.ParseFiles("templates/home.gohtml"))
 	data := homeData{"Home", blockchain.GetBlockchain().AllBlocks()}
-	tmpl.Execute(rw, data)
+	err := templates.ExecuteTemplate(rw, "home", data)
+	if err != nil {
+		return
+	}
 }
 
 func main() {
+	// template와 partials 로딩
+	templates = template.Must(template.ParseGlob(tempateDir + "pages/*.gohtml"))
+	templates = template.Must(templates.ParseGlob(tempateDir + "partials/*.gohtml"))
+
 	http.HandleFunc("/", home)
 
 	fmt.Printf("Listening on http://localhost%s\n", port)

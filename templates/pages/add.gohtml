@@ -1,16 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>노마드 코인</title>
-    <link rel="stylesheet" href="https://unpkg.com/mvp.css">
-</head>
-<body>
-<header>
-    <h1>{{.PageTitle}}</h1>
-</header>
-<main>
-
-</main>
-</body>
-</html>
+{{define "add"}}
+    <!DOCTYPE html>
+    <html lang="en">
+    {{template "head"}}
+    <body>
+    <main>
+        <form>
+            <input type="text" placeholder="Data for you block" required/>
+        </form>
+    </main>
+    {{template "footer"}}
+    </body>
+    </html>
+{{end}}
