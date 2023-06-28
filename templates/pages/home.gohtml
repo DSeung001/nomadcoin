@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>노마드 코인</title>
+    <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+</head>
+<body>
+<header>
+    <h1>{{.PageTitle}}</h1>
+</header>
+<main>
+    {{ range .Blocks}}
+    <!-- Range 안은 다 Blocks 의 값 -->
+        <section>
+            <ul>
+                <li>{{.Data}}</li>
+                <li>{{.Hash}}</li>
+                <li>{{.PrevHash}}</li>
+            </ul>
+        </section>
+    {{end}}
+</main>
+</body>
+</html>
