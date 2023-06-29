@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/nomadcoders/nomadcoin/blockchain"
 	"html/template"
 	"log"
@@ -44,7 +45,7 @@ func add(rw http.ResponseWriter, r *http.Request) {
 
 func Start(port int) {
 	// Mux를 공통으로 사용하지 않게 새로운 ServeMux 생성
-	handler := http.NewServeMux()
+	handler := mux.NewRouter()
 
 	// template와 partials 로딩
 	templates = template.Must(template.ParseGlob(tempateDir + "pages/*.gohtml"))
