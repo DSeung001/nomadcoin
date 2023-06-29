@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/nomadcoders/nomadcoin/blockchain"
 	"github.com/nomadcoders/nomadcoin/utils"
 	"log"
 	"net/http"
@@ -26,12 +27,9 @@ type URLDescription struct {
 	Payload     string `json:"payload,omitempty"`
 }
 
-// URLDescription 이 출력될 때 문자열 값을 지정할 수 있음 String()
-// -> Stringer Interface, 이 인터페이스 말고도 종류가 많음
-// -> 주소 : https://gist.github.com/asukakenji/ac8a05644a2e98f1d5ea8c299541fce9
-//func (u URLDescription) String() string {
-//	return "Hello I'm the URL Description"
-//}
+type AddBlockBody struct {
+	Message string
+}
 
 func documentation(rw http.ResponseWriter, r *http.Request) {
 	data := []URLDescription{
@@ -51,8 +49,23 @@ func documentation(rw http.ResponseWriter, r *http.Request) {
 	utils.HandleErr(json.NewEncoder(rw).Encode(data))
 }
 
+func blocks(rw http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		rw.Header().Add("Content-Type", "application/json")
+		utils.HandleErr(json.NewEncoder(rw).Encode(blockchain.GetBlockchain().AllBlocks()))
+	case "POST":
+		var addBlockBody AddBlockBody
+		utils.HandleErr(json.NewDecoder(r.Body).Decode(&addBlockBody))
+		blockchain.GetBlockchain().AddBlock(addBlockBody.Message)
+		rw.WriteHeader(http.StatusCreated)
+	}
+}
+
 func main() {
 	http.HandleFunc("/", documentation)
-	fmt.Printf("Listening on http://localhost%s", port)
+	http.HandleFunc("/blocks", blocks)
+
+	fmt.Printf("Listening on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, nil))
 }
