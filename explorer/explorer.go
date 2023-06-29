@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	port       string = ":4000"
 	tempateDir string = "explorer/templates/"
 )
 
@@ -43,15 +42,18 @@ func add(rw http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(rw, "add", nil)
 }
 
-func Start() {
+func Start(port int) {
+	// Mux를 공통으로 사용하지 않게 새로운 ServeMux 생성
+	handler := http.NewServeMux()
+
 	// template와 partials 로딩
 	templates = template.Must(template.ParseGlob(tempateDir + "pages/*.gohtml"))
 	templates = template.Must(templates.ParseGlob(tempateDir + "partials/*.gohtml"))
 
-	http.HandleFunc("/", home)
-	http.HandleFunc("/add", add)
+	handler.HandleFunc("/", home)
+	handler.HandleFunc("/add", add)
 
-	fmt.Printf("Listening on http://localhost%s\n", port)
+	fmt.Printf("Listening on http://localhost:%d\n", port)
 	// Fatal 안에 에러가오면 Exit(1)과 같이 프로세스 종료됨
-	log.Fatal(http.ListenAndServe(port, nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), handler))
 }
