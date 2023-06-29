@@ -29,6 +29,10 @@ type urlDescription struct {
 	Payload     string `json:"payload,omitempty"`
 }
 
+type errorResponse struct {
+	ErrorMessage string `json:errorMessage`
+}
+
 type addBlockBody struct {
 	Message string
 }
@@ -73,10 +77,16 @@ func block(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["height"])
 	utils.HandleErr(err)
-	block := blockchain.GetBlockchain().GetBlock(id)
+	block, err := blockchain.GetBlockchain().GetBlock(id)
 
 	rw.Header().Add("Content-Type", "application/json")
-	utils.HandleErr(json.NewEncoder(rw).Encode(block))
+	encoder := json.NewEncoder(rw)
+
+	if err == blockchain.ErrNotFound {
+		utils.HandleErr(encoder.Encode(errorResponse{ErrorMessage: fmt.Sprint(err)}))
+	} else {
+		utils.HandleErr(encoder.Encode(block))
+	}
 }
 
 func Start(aPort int) {
