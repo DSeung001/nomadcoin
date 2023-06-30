@@ -32,6 +32,9 @@ func Start() {
 		rest.Start(*port)
 	case "html":
 		explorer.Start(*port)
+	case "both":
+		go rest.Start(*port)
+		explorer.Start(*port + 1)
 	default:
 		usage()
 	}
