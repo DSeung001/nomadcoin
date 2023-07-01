@@ -23,7 +23,7 @@ type homeData struct {
 
 func home(rw http.ResponseWriter, r *http.Request) {
 	// Must로 template 에러 핸들링
-	data := homeData{"Home", blockchain.GetBlockchain().AllBlocks()}
+	data := homeData{"Home", nil}
 	err := templates.ExecuteTemplate(rw, "home", data)
 	if err != nil {
 		return
@@ -37,7 +37,7 @@ func add(rw http.ResponseWriter, r *http.Request) {
 	case "POST":
 		r.ParseForm()
 		data := r.Form.Get("blockData")
-		blockchain.GetBlockchain().AddBlock(data)
+		blockchain.Blockchain().AddBlock(data)
 		http.Redirect(rw, r, "/home", http.StatusPermanentRedirect)
 	}
 	templates.ExecuteTemplate(rw, "add", nil)

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/nomadcoders/nomadcoin/utils"
 )
@@ -51,6 +52,7 @@ func SaveBlockchain(data []byte) {
 	utils.HandleErr(err)
 }
 
+// Checkpoint : DB에서 마지막 체크포인트 가져오기
 func Checkpoint() []byte {
 	var data []byte
 	utils.HandleErr(DB().View(func(tx *bolt.Tx) error {
@@ -58,5 +60,17 @@ func Checkpoint() []byte {
 		data = bucket.Get([]byte(checkpoint))
 		return nil
 	}))
+	return data
+}
+
+// Block : DB에서 블록 값 가져오기
+func Block(hash string) []byte {
+	var data []byte
+	utils.HandleErr(DB().View(func(t *bolt.Tx) error {
+		bucket := t.Bucket([]byte(dataBucket))
+		data = bucket.Get([]byte(hash))
+		return nil
+	}))
+	fmt.Println(data)
 	return data
 }
