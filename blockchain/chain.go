@@ -18,8 +18,7 @@ var b *blockchain
 var once sync.Once
 
 func (b *blockchain) restore(data []byte) {
-	decoder := gob.NewDecoder(bytes.NewReader(data))
-	decoder.Decode(b)
+	utils.HandleErr(gob.NewDecoder(bytes.NewReader(data)).Decode(b))
 }
 
 func (b *blockchain) persist() {

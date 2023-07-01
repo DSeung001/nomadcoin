@@ -53,10 +53,10 @@ func SaveBlockchain(data []byte) {
 
 func Checkpoint() []byte {
 	var data []byte
-	DB().View(func(tx *bolt.Tx) error {
+	utils.HandleErr(DB().View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(dataBucket))
 		data = bucket.Get([]byte(checkpoint))
 		return nil
-	})
+	}))
 	return data
 }
