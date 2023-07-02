@@ -78,8 +78,6 @@ func block(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	hash := vars["hash"]
 
-	fmt.Println("Receive " + hash)
-
 	block, err := blockchain.FindBlock(hash)
 	encoder := json.NewEncoder(rw)
 

@@ -11,8 +11,8 @@ import (
 func usage() {
 	fmt.Printf("Welcome to 노마드 코인\n\n")
 	fmt.Printf("Please use the following flags:\n\n")
-	fmt.Printf("-port: 	Set the PORT of the server\n")
-	fmt.Printf("-mode: 	Start the REST API (recommand)\n\n")
+	fmt.Printf("-port: 	Set the Port of the server\n")
+	fmt.Printf("-mode: 	Start the Mode [rest,html]\n\n")
 	os.Exit(0)
 }
 
