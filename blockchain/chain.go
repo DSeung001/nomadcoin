@@ -6,9 +6,14 @@ import (
 	"sync"
 )
 
+// defaultDifficulty : 현재 난이도
+// difficultyInterval : 블록 발생 수 (생성 시간에 맞춰 이 개수만큼 생성)
+// blockInterval : 블록 생성 시간 (생성 주기)
 const (
 	defaultDifficulty  int = 2
 	difficultyInterval int = 5
+	blockInterval      int = 2
+	allowedRange       int = 2
 )
 
 type blockchain struct {
@@ -32,6 +37,7 @@ func (b *blockchain) AddBlock(data string) {
 	block := createBlock(data, b.NewestHash, b.Height+1)
 	b.NewestHash = block.Hash
 	b.Height = block.Height
+	b.CurrentDifficulty = block.Difficulty
 	b.persist()
 }
 
@@ -50,11 +56,30 @@ func (b *blockchain) Blocks() []*Block {
 	return blocks
 }
 
+// recalculateDifficulty : 시간에 따른 난이도 재설정
+func (b *blockchain) recalculateDifficulty() int {
+	allBlocks := b.Blocks()
+	newestBlock := allBlocks[0]
+
+	// 아래 코드 이해가 안감 왜 difficultyInterval-1 을 하는거지
+	lastRecalculatedBlock := allBlocks[difficultyInterval-1]
+	actualTime := (newestBlock.Timestamp / 60) - (lastRecalculatedBlock.Timestamp / 60)
+	expectedTime := difficultyInterval * blockInterval
+
+	// 정확한 값으로 구분하는 게 아닌 범위가 좋음
+	if actualTime <= (expectedTime - allowedRange) {
+		return b.CurrentDifficulty + 1
+	} else if actualTime >= (expectedTime + allowedRange) {
+		return b.CurrentDifficulty - 1
+	}
+	return b.CurrentDifficulty
+}
+
 func (b *blockchain) difficulty() int {
 	if b.Height == 0 {
 		return defaultDifficulty
 	} else if b.Height%difficultyInterval == 0 {
-
+		return b.recalculateDifficulty()
 	} else {
 		return b.CurrentDifficulty
 	}
