@@ -43,7 +43,6 @@ func (b *Block) mine() {
 	target := strings.Repeat("0", b.Difficulty)
 	for {
 		hash := utils.Hash(b)
-		//fmt.Printf("Block as String:%s\n Hash:%s\nTarget:%s\nNonce:%d\n\n\n", blockAsString, hash, target, b.Nonce)
 		if strings.HasPrefix(hash, target) {
 			b.Hash = hash
 			b.Timestamp = int(time.Now().Unix())
