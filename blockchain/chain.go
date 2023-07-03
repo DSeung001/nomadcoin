@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"fmt"
 	"github.com/nomadcoders/nomadcoin/db"
 	"github.com/nomadcoders/nomadcoin/utils"
 	"sync"
@@ -27,6 +26,7 @@ func (b *blockchain) AddBlock(data string) {
 	block := createBlock(data, b.NewestHash, b.Height+1)
 	b.NewestHash = block.Hash
 	b.Height = block.Height
+	b.persist()
 }
 
 func (b *blockchain) Blocks() []*Block {
@@ -56,6 +56,5 @@ func Blockchain() *blockchain {
 			}
 		})
 	}
-	fmt.Printf("%s\n", b.NewestHash)
 	return b
 }
