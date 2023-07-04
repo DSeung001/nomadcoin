@@ -39,11 +39,22 @@ type TxOut struct {
 	Amount int    `json:"amount"`
 }
 
-// UTxOut : 사용자가 아직 사용하지 않는 transaction output
+// UTxOut : 사용자가 아직 사용하지 않는 트랜잭션 : unspent transaction output
 type UTxOut struct {
 	TxID   string `json:"txID"`
 	Index  int    `json:"index"`
 	Amount int    `json:"amount"`
+}
+
+// isOnMempool : 메모리 풀에서 사용중인지
+func isOnMempool(uTxOut *UTxOut) bool {
+	exists := false
+	for _, tx := range Mempool.Txs {
+		for _, input := range tx.TxIns {
+			exists = input.TxID == uTxOut.TxID && input.Index == uTxOut.Index
+		}
+	}
+	return exists
 }
 
 // coinbase transaction : 블록체인 네트워크에서 발생하는 거래 내역(은행의 돈 인쇄)
