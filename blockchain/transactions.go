@@ -1,7 +1,6 @@
 package blockchain
 
 import (
-	"errors"
 	"github.com/nomadcoders/nomadcoin/utils"
 	"time"
 )
@@ -29,19 +28,27 @@ func (t *Tx) getId() {
 }
 
 type TxIn struct {
-	Owner  string
-	Amount int
+	TxID  string `json:"txID"`
+	Index int    `json:"index"`
+	Owner string `json:"owner"`
 }
 
 type TxOut struct {
-	Owner  string
-	Amount int
+	Owner  string `json:"owner"`
+	Amount int    `json:"amount"`
+}
+
+// UTxOut : 사용자가 아직 사용하지 않는 transaction output
+type UTxOut struct {
+	TxID   string `json:"txID"`
+	Index  int    `json:"index"`
+	Amount int    `json:"amount"`
 }
 
 // coinbase transaction : 블록체인 네트워크에서 발생하는 거래 내역(은행의 돈 인쇄)
 func makeCoinbaseTx(address string) *Tx {
 	txIns := []*TxIn{
-		{"COINBASE", minderReward},
+		{"", -1, "COINBASE"},
 	}
 	txOuts := []*TxOut{
 		{address, minderReward},
@@ -57,41 +64,7 @@ func makeCoinbaseTx(address string) *Tx {
 }
 
 func makeTx(from, to string, amount int) (*Tx, error) {
-	if Blockchain().BalanceByAddress(from) < amount {
-		return nil, errors.New("not enough money")
-	}
-	var txIns []*TxIn
-	var txOuts []*TxOut
-	total := 0
-	oldTxOuts := Blockchain().TxOutsByAddress(from)
-	// 이전 TxOuts 의 총합 구하기
-	for _, txOut := range oldTxOuts {
-		if total > amount {
-			break
-		}
-		txIn := &TxIn{txOut.Owner, txOut.Amount}
-		txIns = append(txIns, txIn)
-		total += txOut.Amount
-	}
 
-	// amount 수량 체크
-	change := total - amount
-	if change != 0 {
-		// 남은 값
-		changeTxOut := &TxOut{from, change}
-		txOuts = append(txOuts, changeTxOut)
-	}
-	// 보내는 값
-	txOut := &TxOut{to, amount}
-	txOuts = append(txOuts, txOut)
-	tx := &Tx{
-		Id:        "",
-		Timestamp: int(time.Now().Unix()),
-		TxIns:     txIns,
-		TxOuts:    txOuts,
-	}
-	tx.getId()
-	return tx, nil
 }
 
 func (m *mempool) AddTx(to string, amount int) error {
