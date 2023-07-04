@@ -64,6 +64,7 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 	var txOuts []*TxOut
 	total := 0
 	oldTxOuts := Blockchain().TxOutsByAddress(from)
+	// 이전 TxOuts 의 총합 구하기
 	for _, txOut := range oldTxOuts {
 		if total > amount {
 			break
@@ -72,11 +73,15 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 		txIns = append(txIns, txIn)
 		total += txOut.Amount
 	}
+
+	// amount 수량 체크
 	change := total - amount
 	if change != 0 {
+		// 남은 값
 		changeTxOut := &TxOut{from, change}
 		txOuts = append(txOuts, changeTxOut)
 	}
+	// 보내는 값
 	txOut := &TxOut{to, amount}
 	txOuts = append(txOuts, txOut)
 	tx := &Tx{
@@ -96,4 +101,12 @@ func (m *mempool) AddTx(to string, amount int) error {
 	}
 	m.Txs = append(m.Txs, tx)
 	return nil
+}
+
+func (m *mempool) TxToConfirm() []*Tx {
+	coinbase := makeCoinbaseTx("nico")
+	txs := m.Txs
+	txs = append(txs, coinbase)
+	m.Txs = nil
+	return txs
 }
