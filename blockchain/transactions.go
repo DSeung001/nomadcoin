@@ -23,8 +23,7 @@ type Tx struct {
 }
 
 func (t *Tx) getId() {
-	t.Id = utils.Hash(t)
-
+	t.ID = utils.Hash(t)
 }
 
 // TxIn : TxID는 Output을 생성한 트랜잭션을 Index는 위치를
@@ -55,7 +54,7 @@ func makeCoinbaseTx(address string) *Tx {
 		{address, minderReward},
 	}
 	tx := Tx{
-		Id:        "",
+		ID:        "",
 		Timestamp: int(time.Now().Unix()),
 		TxIns:     txIns,
 		TxOuts:    txOuts,
