@@ -85,9 +85,30 @@ func (b *blockchain) difficulty() int {
 	}
 }
 
-// 복잡한 코드가 될 예정
-func (b *blockchain) UTxOutsByAddress(address string) []*TxOut {
+// UTxOutsByAddress : Input 으로 들어와서 아직 사용하지 않은 Output 값을 가져옴
+func (b *blockchain) UTxOutsByAddress(address string) []*UTxOut {
+	var uTxOuts []*UTxOut
+	// 사용자의 Outs Map 구조체
+	creatorTxs := make(map[string]bool)
 
+	for _, block := range b.Blocks() {
+		for _, tx := range block.Transactions {
+			for _, input := range tx.TxIns {
+				if input.Owner == address {
+					creatorTxs[input.TxID] = true
+				}
+			}
+
+			for index, output := range tx.TxOuts {
+				if output.Owner == address {
+					if _, ok := creatorTxs[tx.ID]; !ok {
+						uTxOuts = append(uTxOuts, &UTxOut{tx.ID, index, output.Amount})
+					}
+				}
+			}
+		}
+	}
+	return uTxOuts
 }
 
 func (b *blockchain) BalanceByAddress(address string) int {

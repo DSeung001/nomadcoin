@@ -16,7 +16,7 @@ type mempool struct {
 var Mempool *mempool = &mempool{}
 
 type Tx struct {
-	Id        string   `json:"id"`
+	ID        string   `json:"id"`
 	Timestamp int      `json:"timestamp"`
 	TxIns     []*TxIn  `json:"txIns"`
 	TxOuts    []*TxOut `json:"txOuts"`
@@ -27,6 +27,7 @@ func (t *Tx) getId() {
 
 }
 
+// TxIn : TxID는 Output을 생성한 트랜잭션을 Index는 위치를
 type TxIn struct {
 	TxID  string `json:"txID"`
 	Index int    `json:"index"`
