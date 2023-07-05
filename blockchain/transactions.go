@@ -49,9 +49,15 @@ type UTxOut struct {
 // isOnMempool : 메모리 풀에서 사용중인지
 func isOnMempool(uTxOut *UTxOut) bool {
 	exists := false
+
+	// Label
+Outer:
 	for _, tx := range Mempool.Txs {
 		for _, input := range tx.TxIns {
-			exists = input.TxID == uTxOut.TxID && input.Index == uTxOut.Index
+			if input.TxID == uTxOut.TxID && input.Index == uTxOut.Index {
+				exists = true
+				break Outer
+			}
 		}
 	}
 	return exists
@@ -76,13 +82,13 @@ func makeCoinbaseTx(address string) *Tx {
 }
 
 func makeTx(from, to string, amount int) (*Tx, error) {
-	if Blockchain().BalanceByAddress(from) < amount {
+	if BalanceByAddress(from, Blockchain()) < amount {
 		return nil, errors.New("not enough 돈")
 	}
 	var txOuts []*TxOut
 	var txIns []*TxIn
 	total := 0
-	UTxOuts := Blockchain().UTxOutsByAddress(from)
+	UTxOuts := UTxOutsByAddress(from, Blockchain())
 	for _, UTxOut := range UTxOuts {
 		if total > amount {
 			break

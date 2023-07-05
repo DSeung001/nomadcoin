@@ -25,12 +25,11 @@ type blockchain struct {
 var b *blockchain
 var once sync.Once
 
+// Struct 를 변화시키는 거면 Receive Method 로 아니면 function 으로
+// 그리고 Receive Method 가 위로 아래는 function
+
 func (b *blockchain) restore(data []byte) {
 	utils.FromBytes(b, data)
-}
-
-func (b *blockchain) persist() {
-	db.SaveCheckpoint(utils.ToBytes(b))
 }
 
 func (b *blockchain) AddBlock() {
@@ -38,10 +37,14 @@ func (b *blockchain) AddBlock() {
 	b.NewestHash = block.Hash
 	b.Height = block.Height
 	b.CurrentDifficulty = block.Difficulty
-	b.persist()
+	persistBlockchain(b)
 }
 
-func (b *blockchain) Blocks() []*Block {
+func persistBlockchain(b *blockchain) {
+	db.SaveCheckpoint(utils.ToBytes(b))
+}
+
+func Blocks(b *blockchain) []*Block {
 	var blocks []*Block
 	hashCursor := b.NewestHash
 	for {
@@ -57,8 +60,8 @@ func (b *blockchain) Blocks() []*Block {
 }
 
 // recalculateDifficulty : 시간에 따른 난이도 재설정
-func (b *blockchain) recalculateDifficulty() int {
-	allBlocks := b.Blocks()
+func recalculateDifficulty(b *blockchain) int {
+	allBlocks := Blocks(b)
 	newestBlock := allBlocks[0]
 
 	// 아래 코드 이해가 안감 왜 difficultyInterval-1 을 하는거지
@@ -75,23 +78,23 @@ func (b *blockchain) recalculateDifficulty() int {
 	return b.CurrentDifficulty
 }
 
-func (b *blockchain) difficulty() int {
+func difficulty(b *blockchain) int {
 	if b.Height == 0 {
 		return defaultDifficulty
 	} else if b.Height%difficultyInterval == 0 {
-		return b.recalculateDifficulty()
+		return recalculateDifficulty(b)
 	} else {
 		return b.CurrentDifficulty
 	}
 }
 
 // UTxOutsByAddress : Input 으로 들어와서 아직 사용하지 않은 Output 값을 가져옴
-func (b *blockchain) UTxOutsByAddress(address string) []*UTxOut {
+func UTxOutsByAddress(address string, b *blockchain) []*UTxOut {
 	var uTxOuts []*UTxOut
 	// 사용자의 Outs Map 구조체
 	creatorTxs := make(map[string]bool)
 
-	for _, block := range b.Blocks() {
+	for _, block := range Blocks(b) {
 		for _, tx := range block.Transactions {
 			for _, input := range tx.TxIns {
 				if input.Owner == address {
@@ -114,8 +117,8 @@ func (b *blockchain) UTxOutsByAddress(address string) []*UTxOut {
 	return uTxOuts
 }
 
-func (b *blockchain) BalanceByAddress(address string) int {
-	txOuts := b.UTxOutsByAddress(address)
+func BalanceByAddress(address string, b *blockchain) int {
+	txOuts := UTxOutsByAddress(address, b)
 	var amount int
 	for _, txOut := range txOuts {
 		amount += txOut.Amount
@@ -124,18 +127,16 @@ func (b *blockchain) BalanceByAddress(address string) int {
 }
 
 func Blockchain() *blockchain {
-	if b == nil {
-		once.Do(func() {
-			b = &blockchain{
-				Height: 0,
-			}
-			checkpoint := db.Checkpoint()
-			if checkpoint == nil {
-				b.AddBlock()
-			} else {
-				b.restore(checkpoint)
-			}
-		})
-	}
+	once.Do(func() {
+		b = &blockchain{
+			Height: 0,
+		}
+		checkpoint := db.Checkpoint()
+		if checkpoint == nil {
+			b.AddBlock()
+		} else {
+			b.restore(checkpoint)
+		}
+	})
 	return b
 }
