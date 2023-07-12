@@ -1,13 +1,11 @@
 package wallet
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/x509"
 	"encoding/hex"
 	"fmt"
 	"github.com/nomadcoders/nomadcoin/utils"
+	"math/big"
 )
 
 const (
@@ -16,38 +14,23 @@ const (
 	hashedMessage string = "1c5863cd55b5a4413fd59f054af57ba3c75c0698b3851d70f99b8de2d5c7338f"
 )
 
-// 일반적으로 아래 내용은 다 다른대서 오지만 공부를 위해 모아둔 것
-// r, s : 지갑의 서명값
-// privateKey : 파일
-// 해시메시지 : 트랜잭션
-
 func Start() {
-
-	// 키 생성
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	keyAsBytes, err := x509.MarshalECPrivateKey(privateKey)
-	utils.HandleErr(err)
-	fmt.Println("Private Key", privateKey.D)
-	fmt.Println("Public Key, x, y", privateKey.X, privateKey.Y)
-	fmt.Printf("keyAsBytes(prviate key) : %x\n", keyAsBytes)
-
-	// 해싱
-	message := "i love you"
-	hashedMessage := utils.Hash(message)
-	fmt.Println(hashedMessage)
-	hashAsBytes, err := hex.DecodeString(hashedMessage)
+	// 지금은 16진수인게 확실하지만 나중에 지갑으로 만들면 파일이기에 변경될 수 있는 점을 대처하기 위함
+	privBytes, err := hex.DecodeString(privateKey)
 	utils.HandleErr(err)
 
-	// 서명
-	r, s, err := ecdsa.Sign(rand.Reader, privateKey, hashAsBytes)
+	restoreKey, err := x509.ParseECPrivateKey([]byte(privBytes))
 	utils.HandleErr(err)
-	fmt.Printf("R:%d\nS:%d\n", r, s)
-	fmt.Println(r.Bytes(), s.Bytes())
-	fmt.Println(len(r.Bytes()), len(s.Bytes()))
-	signature := append(r.Bytes(), s.Bytes()...)
-	fmt.Printf("%x\n", signature)
+	fmt.Println(restoreKey)
 
-	// 인증
-	ok := ecdsa.Verify(&privateKey.PublicKey, hashAsBytes, r, s)
-	fmt.Println(ok)
+	sigBytes, err := hex.DecodeString(signature)
+	rBytes := sigBytes[:len(sigBytes)/2]
+	sBytes := sigBytes[len(sigBytes)/2:]
+	fmt.Printf("%d\n\n%d\n\n%d\n\n", sigBytes, rBytes, sBytes)
+
+	var bigR, bigS = big.Int{}, big.Int{}
+	bigR.SetBytes(rBytes)
+	bigS.SetBytes(sBytes)
+
+	fmt.Println(bigR, bigS)
 }
