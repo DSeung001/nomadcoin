@@ -1,14 +1,30 @@
 package wallet
 
-1) we hash the msg.
-	"i love you" -> hash(x) -> "hashed_message"
+import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"github.com/nomadcoders/nomadcoin/utils"
+)
 
-2) generate key pair
-	KeyPair (privateKey, publicKey)
-	(save privateKey to afile(wallet))
+func Start() {
 
-3) sign the hash
-	("hashed_message" + privateKey) -> "signature"
+	// 키 생성
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	utils.HandleErr(err)
+	fmt.Println("Private Key", privateKey.D)
+	fmt.Println("Public Key, x, y", privateKey.X, privateKey.Y)
 
-4) verfiy
-	("hashed_message" + "signature" + publicKey) -> true|false
+	// 해싱
+	message := "i love you"
+	hashedMessage := utils.Hash(message)
+	hashAsBytes, err := hex.DecodeString(hashedMessage)
+	utils.HandleErr(err)
+
+	// 서명
+	r, s, err := ecdsa.Sign(rand.Reader, privateKey, hashAsBytes)
+	utils.HandleErr(err)
+	fmt.Printf("R:%d\nS:%d", r, s)
+}
