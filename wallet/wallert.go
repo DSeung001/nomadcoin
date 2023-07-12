@@ -20,11 +20,16 @@ func Start() {
 	// 해싱
 	message := "i love you"
 	hashedMessage := utils.Hash(message)
+	fmt.Println(hashedMessage)
 	hashAsBytes, err := hex.DecodeString(hashedMessage)
 	utils.HandleErr(err)
 
 	// 서명
 	r, s, err := ecdsa.Sign(rand.Reader, privateKey, hashAsBytes)
 	utils.HandleErr(err)
-	fmt.Printf("R:%d\nS:%d", r, s)
+	fmt.Printf("R:%d\nS:%d\n", r, s)
+
+	// 인증
+	ok := ecdsa.Verify(&privateKey.PublicKey, hashAsBytes, r, s)
+	fmt.Println(ok)
 }
