@@ -62,8 +62,8 @@ func aFromK(key *ecdsa.PrivateKey) string {
 	return encodeBigInts(key.X.Bytes(), key.Y.Bytes())
 }
 
-// sing : private key 로 서명
-func sign(payload string, w wallet) string {
+// Sign : private key 로 서명
+func Sign(payload string, w *wallet) string {
 	// 아래 16진수로 안바꿔도 되긴하지만 string에 문제가 있을 수 있으니 체크 로직을 넣은 것
 	payloadAsBytes, err := hex.DecodeString(payload)
 	utils.HandleErr(err)

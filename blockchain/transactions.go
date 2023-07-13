@@ -24,20 +24,16 @@ type Tx struct {
 	TxOuts    []*TxOut `json:"txOuts"`
 }
 
-func (t *Tx) getId() {
-	t.ID = utils.Hash(t)
-}
-
 // TxIn : TxID는 Output을 생성한 트랜잭션을 Index는 위치를
 type TxIn struct {
-	TxID  string `json:"txID"`
-	Index int    `json:"index"`
-	Owner string `json:"owner"`
+	TxID      string `json:"txID"`
+	Index     int    `json:"index"`
+	Signature string `json:"signature"`
 }
 
 type TxOut struct {
-	Owner  string `json:"owner"`
-	Amount int    `json:"amount"`
+	Address string `json:"address"`
+	Amount  int    `json:"amount"`
 }
 
 // UTxOut : 사용자가 아직 사용하지 않는 트랜잭션 : unspent transaction output
@@ -45,6 +41,24 @@ type UTxOut struct {
 	TxID   string `json:"txID"`
 	Index  int    `json:"index"`
 	Amount int    `json:"amount"`
+}
+
+func (t *Tx) getId() {
+	t.ID = utils.Hash(t)
+}
+
+func (t *Tx) sign() {
+	for _, txIn := range t.TxIns {
+		txIn.Signature = wallet.Sign(t.ID, wallet.Wallet())
+	}
+}
+
+func validate(tx *Tx) bool {
+	valid := true
+	for _, txIn := range tx.TxIns {
+		prevTx := FindTx(Blockchain(), txIn.TxID)
+	}
+	return valid
 }
 
 // isOnMempool : 메모리 풀에서 사용중인지
@@ -79,6 +93,7 @@ func makeCoinbaseTx(address string) *Tx {
 		TxOuts:    txOuts,
 	}
 	tx.getId()
+	tx.sign()
 	return &tx
 }
 
