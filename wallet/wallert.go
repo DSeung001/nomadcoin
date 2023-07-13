@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/nomadcoders/nomadcoin/utils"
+	"math/big"
 	"os"
 )
 
@@ -50,11 +51,13 @@ func restoreKey() (key *ecdsa.PrivateKey) {
 	return
 }
 
+// aFromK : key로 address 가져오기
 func aFromK(key *ecdsa.PrivateKey) string {
 	z := append(key.X.Bytes(), key.Y.Bytes()...)
 	return fmt.Sprintf("%x", z)
 }
 
+// sing : private key 로 서명
 func sign(payload string, w *wallet) string {
 	payloadAsBytes, err := hex.DecodeString(payload)
 	utils.HandleErr(err)
@@ -64,8 +67,36 @@ func sign(payload string, w *wallet) string {
 	return fmt.Sprintf("%x", signature)
 }
 
-func verify(signature, payload, publicKey string) bool {
+// restoreBigInts : signature 값 복원 => r,s
+func restoreBigInts(payload string) (*big.Int, *big.Int, error) {
+	bytes, err := hex.DecodeString(payload)
+	if err != nil {
+		return nil, nil, err
+	}
+	firstHalfBytes := bytes[:len(bytes)/2]
+	secondHalfBytes := bytes[len(bytes)/2:]
+	bigA, bigB := big.Int{}, big.Int{}
+	bigA.SetBytes(firstHalfBytes)
+	bigB.SetBytes(secondHalfBytes)
+	return &bigA, &bigB, nil
+}
 
+// verify : 키 검증
+func verify(signature, payload, address string) bool {
+	r, s, err := restoreBigInts(signature)
+	utils.HandleErr(err)
+	x, y, err := restoreBigInts(payload)
+	utils.HandleErr(err)
+
+	publicKey := ecdsa.PublicKey{
+		Curve: elliptic.P256(),
+		X:     x,
+		Y:     y,
+	}
+	payloadBytes, err := hex.DecodeString(payload)
+	utils.HandleErr(err)
+	ok := ecdsa.Verify(&publicKey, payloadBytes, r, s)
+	return ok
 }
 
 func Wallet() *wallet {
