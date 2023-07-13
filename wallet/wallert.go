@@ -51,20 +51,25 @@ func restoreKey() (key *ecdsa.PrivateKey) {
 	return
 }
 
-// aFromK : key로 address 가져오기
-func aFromK(key *ecdsa.PrivateKey) string {
-	z := append(key.X.Bytes(), key.Y.Bytes()...)
+func encodeBigInts(a, b []byte) string {
+	z := append(a, b...)
 	return fmt.Sprintf("%x", z)
 }
 
+// aFromK : key로 address 가져오기
+func aFromK(key *ecdsa.PrivateKey) string {
+	// private Key는 public Key의 x, y 좌표를 줌
+	return encodeBigInts(key.X.Bytes(), key.Y.Bytes())
+}
+
 // sing : private key 로 서명
-func sign(payload string, w *wallet) string {
+func sign(payload string, w wallet) string {
+	// 아래 16진수로 안바꿔도 되긴하지만 string에 문제가 있을 수 있으니 체크 로직을 넣은 것
 	payloadAsBytes, err := hex.DecodeString(payload)
 	utils.HandleErr(err)
 	r, s, err := ecdsa.Sign(rand.Reader, w.privateKey, payloadAsBytes)
 	utils.HandleErr(err)
-	signature := append(r.Bytes(), s.Bytes()...)
-	return fmt.Sprintf("%x", signature)
+	return encodeBigInts(r.Bytes(), s.Bytes())
 }
 
 // restoreBigInts : signature 값 복원 => r,s
