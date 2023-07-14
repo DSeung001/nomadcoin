@@ -86,8 +86,8 @@ func restoreBigInts(payload string) (*big.Int, *big.Int, error) {
 	return &bigA, &bigB, nil
 }
 
-// verify : 키 검증
-func verify(signature, payload, address string) bool {
+// Verify : 키 검증
+func Verify(signature, payload, address string) bool {
 	r, s, err := restoreBigInts(signature)
 	utils.HandleErr(err)
 	x, y, err := restoreBigInts(payload)
