@@ -42,10 +42,10 @@ func FindBlock(hash string) (*Block, error) {
 func (b *Block) mine() {
 	target := strings.Repeat("0", b.Difficulty)
 	for {
+		b.Timestamp = int(time.Now().Unix())
 		hash := utils.Hash(b)
 		if strings.HasPrefix(hash, target) {
 			b.Hash = hash
-			b.Timestamp = int(time.Now().Unix())
 			break
 		} else {
 			b.Nonce++
@@ -53,8 +53,8 @@ func (b *Block) mine() {
 	}
 }
 
-func createBlock(prevHash string, height int, diff int) *Block {
-	block := Block{
+func createBlock(prevHash string, height, diff int) *Block {
+	block := &Block{
 		Hash:       "",
 		PrevHash:   prevHash,
 		Height:     height,
@@ -66,5 +66,5 @@ func createBlock(prevHash string, height int, diff int) *Block {
 	// Memory pool transaction 승인작업 => 검증
 	block.Transactions = Mempool.TxToConfirm()
 	block.persist()
-	return &block
+	return block
 }

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	minderReward int = 50
+	minerReward int = 50
 )
 
 type mempool struct {
@@ -26,7 +26,7 @@ type Tx struct {
 
 // TxIn : TxID는 Output을 생성한 트랜잭션을 Index는 위치를
 type TxIn struct {
-	TxID      string `json:"txID"`
+	TxID      string `json:"txId"`
 	Index     int    `json:"index"`
 	Signature string `json:"signature"`
 }
@@ -38,7 +38,7 @@ type TxOut struct {
 
 // UTxOut : 사용자가 아직 사용하지 않는 트랜잭션 : unspent transaction output
 type UTxOut struct {
-	TxID   string `json:"txID"`
+	TxID   string `json:"txId"`
 	Index  int    `json:"index"`
 	Amount int    `json:"amount"`
 }
@@ -70,11 +70,7 @@ func validate(tx *Tx) bool {
 	return valid
 }
 
-// isOnMempool : 메모리 풀에서 사용중인지
-func isOnMempool(uTxOut *UTxOut) bool {
-	exists := false
-
-	// Label
+func isOnMempool(uTxOut *UTxOut) (exists bool) {
 Outer:
 	for _, tx := range Mempool.Txs {
 		for _, input := range tx.TxIns {
@@ -84,7 +80,7 @@ Outer:
 			}
 		}
 	}
-	return exists
+	return
 }
 
 // coinbase transaction : 블록체인 네트워크에서 발생하는 거래 내역(은행의 돈 인쇄)
@@ -93,7 +89,7 @@ func makeCoinbaseTx(address string) *Tx {
 		{"", -1, "COINBASE"},
 	}
 	txOuts := []*TxOut{
-		{address, minderReward},
+		{address, minerReward},
 	}
 	tx := Tx{
 		ID:        "",
@@ -102,7 +98,6 @@ func makeCoinbaseTx(address string) *Tx {
 		TxOuts:    txOuts,
 	}
 	tx.getId()
-	tx.sign()
 	return &tx
 }
 
@@ -116,14 +111,14 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 	var txOuts []*TxOut
 	var txIns []*TxIn
 	total := 0
-	UTxOuts := UTxOutsByAddress(from, Blockchain())
-	for _, UTxOut := range UTxOuts {
-		if total > amount {
+	uTxOuts := UTxOutsByAddress(from, Blockchain())
+	for _, uTxOut := range uTxOuts {
+		if total >= amount {
 			break
 		}
-		txIn := &TxIn{UTxOut.TxID, UTxOut.Index, from}
+		txIn := &TxIn{uTxOut.TxID, uTxOut.Index, from}
 		txIns = append(txIns, txIn)
-		total += UTxOut.Amount
+		total += uTxOut.Amount
 	}
 	if change := total - amount; change != 0 {
 		changeTxOut := &TxOut{from, change}

@@ -135,6 +135,7 @@ func UTxOutsByAddress(address string, b *blockchain) []*UTxOut {
 		}
 	}
 	return uTxOuts
+
 }
 
 func BalanceByAddress(address string, b *blockchain) int {
