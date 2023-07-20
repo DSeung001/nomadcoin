@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nomadcoders/nomadcoin/blockchain"
 	"github.com/nomadcoders/nomadcoin/utils"
+	"github.com/nomadcoders/nomadcoin/wallet"
 	"log"
 	"net/http"
 )
@@ -31,6 +32,10 @@ type urlDescription struct {
 type balanceResponse struct {
 	Address string `json:"address"`
 	Balance int    `json:"balance"`
+}
+
+type myWalletResponse struct {
+	Address string `json:"address"`
 }
 
 type errorResponse struct {
@@ -122,7 +127,7 @@ func balance(rw http.ResponseWriter, r *http.Request) {
 	switch total {
 	case "true":
 		amount := blockchain.BalanceByAddress(address, blockchain.Blockchain())
-		json.NewEncoder(rw).Encode(balanceResponse{address, amount})
+		utils.HandleErr(json.NewEncoder(rw).Encode(balanceResponse{address, amount}))
 	default:
 		utils.HandleErr(json.NewEncoder(rw).Encode(blockchain.UTxOutsByAddress(address, blockchain.Blockchain())))
 	}
@@ -142,6 +147,17 @@ func transactions(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 }
 
+func myWallet(rw http.ResponseWriter, r *http.Request) {
+	address := wallet.Wallet().Address
+	json.NewEncoder(rw).Encode(myWalletResponse{Address: address})
+
+	// 아래와 같이 인라인 생성 후 사용도 가능은 한대 별로 안이쁨
+	/*	json.NewEncoder(rw).Encode(
+		struct {
+			Address string `json:"address"`
+		}{Address: address})*/
+}
+
 func Start(aPort int) {
 	port = fmt.Sprintf(":%d", aPort)
 
@@ -154,7 +170,8 @@ func Start(aPort int) {
 	router.HandleFunc("/blocks", blocks).Methods("GET", "POST")
 	router.HandleFunc("/blocks/{hash:[a-f0-9]+}", block).Methods("GET")
 	router.HandleFunc("/balance/{address}", balance)
-	router.HandleFunc("/mempool", mempool)
+	router.HandleFunc("/mempool", mempool).Methods("GET")
+	router.HandleFunc("/wallet", myWallet).Methods("GET")
 	router.HandleFunc("/transactions", transactions).Methods("POST")
 
 	fmt.Printf("Listening on http://localhost%s\n", port)
