@@ -90,9 +90,8 @@ func restoreBigInts(payload string) (*big.Int, *big.Int, error) {
 func Verify(signature, payload, address string) bool {
 	r, s, err := restoreBigInts(signature)
 	utils.HandleErr(err)
-	x, y, err := restoreBigInts(payload)
+	x, y, err := restoreBigInts(address)
 	utils.HandleErr(err)
-
 	publicKey := ecdsa.PublicKey{
 		Curve: elliptic.P256(),
 		X:     x,
