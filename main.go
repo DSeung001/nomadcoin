@@ -1,15 +1,24 @@
 package main
 
 import (
-	"github.com/nomadcoders/nomadcoin/blockchain"
-	"github.com/nomadcoders/nomadcoin/cli"
-	"github.com/nomadcoders/nomadcoin/db"
+	"fmt"
+	"time"
 )
 
-func main() {
-	// defer 은 함수가 종료시 실행
-	defer db.Close()
+func countToTen(name string) {
+	for i := range [10]int{} {
+		fmt.Println(name, ": ", i)
+		time.Sleep(1 * time.Second)
+	}
+}
 
-	blockchain.Blockchain()
-	cli.Start()
+// main 은 go 루틴을 기다리지 않음
+func main() {
+	go countToTen("first")
+	go countToTen("second")
+	go countToTen("third")
+
+	for {
+
+	}
 }
