@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/nomadcoders/nomadcoin/utils"
 	"net/http"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{}
@@ -20,7 +21,14 @@ func Upgrade(rw http.ResponseWriter, r *http.Request) {
 	// ReadMessage 는 하나만 받고 blocking
 	for {
 		_, p, err := conn.ReadMessage()
-		utils.HandleErr(err)
-		fmt.Printf("%s\n", p)
+		if err != nil {
+			conn.Close()
+			break
+		}
+		fmt.Printf("Just got: %s\n", p)
+		time.Sleep(1 * time.Second)
+		message := fmt.Sprintf("New message: %s", p)
+		utils.HandleErr(conn.WriteMessage(websocket.TextMessage, []byte(message)))
 	}
+
 }
