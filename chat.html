@@ -9,7 +9,14 @@
 </head>
 <body>
     <script>
-        const scoket = new WebSocket("ws://localhost:4000/ws")
+        const socket = new WebSocket("ws://localhost:4000/ws")
+        socket.addEventListener("close", ()=>console.log("closed"))
+
+        let number = 1
+        setInterval(()=>{
+            socket.send("hello darling! js < go "+number)
+            number++
+        }, 2000)
     </script>
 </body>
 </html>
