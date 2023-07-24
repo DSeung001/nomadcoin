@@ -52,7 +52,7 @@ func Start(port int) {
 	handler.HandleFunc("/", home)
 	handler.HandleFunc("/add", add)
 
-	fmt.Printf("Listening on http://localhost:%d\n", port)
+	fmt.Printf("[Explorer] Listening on http://localhost:%d\n", port)
 	// Fatal 안에 에러가오면 Exit(1)과 같이 프로세스 종료됨
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), handler))
 }

@@ -149,7 +149,7 @@ func BalanceByAddress(address string, b *blockchain) int {
 
 func Blockchain() *blockchain {
 
-	// DO 안에 function 이 Do를 슨 function 을 쓰면 데드락 걸림
+	// DO 안에 function 이 Do를 쓴 function 을 쓰면 데드락 걸림
 	once.Do(func() {
 		b = &blockchain{
 			Height: 0,
