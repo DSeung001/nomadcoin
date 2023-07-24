@@ -1,13 +1,12 @@
 package p2p
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/nomadcoders/nomadcoin/utils"
 	"net/http"
-	"time"
 )
 
+var conns []*websocket.Conn
 var upgrader = websocket.Upgrader{}
 
 func Upgrade(rw http.ResponseWriter, r *http.Request) {
@@ -15,8 +14,8 @@ func Upgrade(rw http.ResponseWriter, r *http.Request) {
 		return true
 	}
 	conn, err := upgrader.Upgrade(rw, r, nil)
+	conns = append(conns, conn)
 	utils.HandleErr(err)
-	fmt.Println("Waiting 4 message...")
 
 	// ReadMessage 는 하나만 받고 blocking
 	for {
@@ -25,10 +24,13 @@ func Upgrade(rw http.ResponseWriter, r *http.Request) {
 			conn.Close()
 			break
 		}
-		fmt.Printf("Just got: %s\n", p)
-		time.Sleep(1 * time.Second)
-		message := fmt.Sprintf("New message: %s", p)
-		utils.HandleErr(conn.WriteMessage(websocket.TextMessage, []byte(message)))
+
+		// 본인 Connection 에는 메세지를 쏘지 않음
+		for _, aConn := range conns {
+			if aConn != conn {
+				utils.Hash(aConn.WriteMessage(websocket.TextMessage, p))
+			}
+		}
 	}
 
 }
