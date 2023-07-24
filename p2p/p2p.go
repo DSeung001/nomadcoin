@@ -1,36 +1,28 @@
 package p2p
 
 import (
+	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/nomadcoders/nomadcoin/utils"
 	"net/http"
 )
 
-var conns []*websocket.Conn
 var upgrader = websocket.Upgrader{}
 
+// port 4000, 3000이 서로 요청을 주고 받는 걸로 만들 생각
+
 func Upgrade(rw http.ResponseWriter, r *http.Request) {
+	// Port :3000 will upgrade the reqeust form :4000
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
 	conn, err := upgrader.Upgrade(rw, r, nil)
-	conns = append(conns, conn)
 	utils.HandleErr(err)
+}
 
-	// ReadMessage 는 하나만 받고 blocking
-	for {
-		_, p, err := conn.ReadMessage()
-		if err != nil {
-			conn.Close()
-			break
-		}
-
-		// 본인 Connection 에는 메세지를 쏘지 않음
-		for _, aConn := range conns {
-			if aConn != conn {
-				utils.Hash(aConn.WriteMessage(websocket.TextMessage, p))
-			}
-		}
-	}
-
+func AddPeer(address, port string) {
+	// Port :4000 is requesting an upgrade from the port :3000
+	// Go에서 websocket 요청보내기
+	conn, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("ws://%s:%s", address, port), nil)
+	utils.HandleErr(err)
 }

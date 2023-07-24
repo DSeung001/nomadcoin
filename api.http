@@ -30,3 +30,11 @@ http://localhost:4000/wallet
 http://localhost:4000/balance/daad332c1eb5ffbbf2e315afb59585fcbc51a2fba30c4e0b559db7e1f929d52235c1a3c604fbabf5960cf2207e4bd358bcafba2930188644e453352efc74c2d9
 ###
 http://localhost:4000/balance/lynn
+###
+POST http://localhost:4000/peers
+Content-Type: application/json
+
+{
+"address":"127.0.0.1",
+"port": "3000"
+}
