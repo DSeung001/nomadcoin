@@ -16,7 +16,7 @@ type url string
 
 var port string
 
-// Method만 지정하면 내부적으로 인터페이스에서 가져다가 씀
+// Method 만 지정하면 내부적으로 인터페이스에서 가져다가 씀
 func (u url) MarshalText() ([]byte, error) {
 	url := fmt.Sprintf("http://localhost%s%s", port, u)
 	return []byte(url), nil
