@@ -9,7 +9,7 @@ import (
 // Mutex 로 data race 보호할 거임 => lock/unlock
 type peers struct {
 	v map[string]*peer
-	m sync.Mutex
+	m sync.Mutex // Mutex를 넣어야 unlock/lock 가능
 }
 
 var Peers peers = peers{
@@ -38,8 +38,13 @@ func AllPeers(p *peers) []string {
 // Receiver Method
 func (p *peer) close() {
 	// data race 보호를 위한 코드 추가
+
 	Peers.m.Lock()
-	defer Peers.m.Unlock()
+	defer func() {
+		//	// 20초 안에 port:4000으로 시도시 락이 안풀려서 에러 발생!
+		//	time.Sleep(20 * time.Second)
+		Peers.m.Unlock()
+	}()
 	p.conn.Close()
 	delete(Peers.v, p.key)
 }
