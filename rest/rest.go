@@ -180,7 +180,7 @@ func myWallet(rw http.ResponseWriter, r *http.Request) {
 func peers(rw http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		json.NewEncoder(rw).Encode(p2p.Peers)
+		json.NewEncoder(rw).Encode(p2p.AllPeers(&p2p.Peers))
 	case "POST":
 		var payload addPeerPayload
 		json.NewDecoder(r.Body).Decode(&payload)
