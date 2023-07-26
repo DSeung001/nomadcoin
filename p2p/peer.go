@@ -53,12 +53,12 @@ func (p *peer) read() {
 	// 에러 발생 시 메서드가 종료되니 defer 사용
 	defer p.close()
 	for {
-		fmt.Println("read blocking...")
-		_, m, err := p.conn.ReadMessage()
+		m := Message{}
+		err := p.conn.ReadJSON(&m)
 		if err != nil {
 			break
 		}
-		fmt.Printf("[read] %s\n", m)
+		fmt.Println(m.Kind)
 	}
 }
 
