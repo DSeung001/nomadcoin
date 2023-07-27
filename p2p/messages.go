@@ -45,5 +45,4 @@ func handleMsg(m *Message, p *peer) {
 	default:
 		fmt.Printf("Peer: %s, Sent a message with kind of: %d", p.key, m.Kind)
 	}
-
 }
