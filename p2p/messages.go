@@ -72,6 +72,7 @@ func handleMsg(m *Message, p *peer) {
 		fmt.Printf("Received all the block from %s\n", p.key)
 		var payload []*blockchain.Block
 		utils.HandleErr(json.Unmarshal(m.Payload, &payload))
+		blockchain.Blockchain().Replace(payload)
 	default:
 		fmt.Printf("Peer: %s, Sent a message with kind of: %d", p.key, m.Kind)
 	}

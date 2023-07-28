@@ -22,6 +22,10 @@ func (b *Block) persist() {
 	db.SaveBlock(b.Hash, utils.ToBytes(b))
 }
 
+func persistBlock(b *Block) {
+	db.SaveBlock(b.Hash, utils.ToBytes(b))
+}
+
 var ErrNotFound = errors.New("block not found")
 
 func (b *Block) restore(data []byte) {
