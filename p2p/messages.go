@@ -30,6 +30,7 @@ func makeMessage(kind MessageKind, payload interface{}) []byte {
 }
 
 func sendNewestBlock(p *peer) {
+	fmt.Printf("Sending newest block to %s\n", p.key)
 	b, err := blockchain.FindBlock(blockchain.Blockchain().NewestHash)
 	utils.HandleErr(err)
 	m := makeMessage(MessageNewestBlock, b)
@@ -49,6 +50,7 @@ func sendAllBlocks(p *peer) {
 func handleMsg(m *Message, p *peer) {
 	switch m.Kind {
 	case MessageNewestBlock:
+		fmt.Printf("Received the newest block from %s\n", p.key)
 		var payload blockchain.Block
 		utils.HandleErr(json.Unmarshal(m.Payload, &payload))
 		b, err := blockchain.FindBlock(blockchain.Blockchain().NewestHash)
@@ -57,16 +59,18 @@ func handleMsg(m *Message, p *peer) {
 		// 테스트를 위해 > 에서 >= 로 임시로 변경
 		if payload.Height >= b.Height {
 			// request all the blocks from 4000
+			fmt.Printf("Requesting all blocks from %s\n", p.key)
 			requestAllBlocks(p)
 		} else {
 			// send 4000 our block
 			sendNewestBlock(p)
 		}
 	case MessageAllBlocksRequest:
+		fmt.Printf("%s wants all the blocks.\n", p.key)
 		sendAllBlocks(p)
 	case MessageAllBlocksResponse:
+		fmt.Printf("Received all the block from %s\n", p.key)
 		var payload []*blockchain.Block
-		json.Unmarshal(m.Payload, &payload)
 		utils.HandleErr(json.Unmarshal(m.Payload, &payload))
 	default:
 		fmt.Printf("Peer: %s, Sent a message with kind of: %d", p.key, m.Kind)
