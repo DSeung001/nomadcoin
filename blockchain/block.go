@@ -68,7 +68,7 @@ func createBlock(prevHash string, height, diff int) *Block {
 	// 해시
 	block.mine()
 	// Memory pool transaction 승인작업 => 검증
-	block.Transactions = Mempool.TxToConfirm()
+	block.Transactions = Mempool().TxToConfirm()
 	block.persist()
 	return block
 }
