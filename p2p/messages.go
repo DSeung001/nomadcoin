@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/nomadcoders/nomadcoin/blockchain"
 	"github.com/nomadcoders/nomadcoin/utils"
+	"strings"
 )
 
 type MessageKind int
@@ -61,7 +62,7 @@ func notifyNewTx(tx *blockchain.Tx, p *peer) {
 }
 
 func notifyNewPeer(address string, p *peer) {
-	m := makeMessage(MessageNewTxNotify, address)
+	m := makeMessage(MessageNewPeerNotify, address)
 	p.inbox <- m
 }
 
@@ -102,7 +103,8 @@ func handleMsg(m *Message, p *peer) {
 	case MessageNewPeerNotify:
 		var payload string
 		utils.HandleErr(json.Unmarshal(m.Payload, &payload))
-		fmt.Printf("I will now /ws upgrade %s", payload)
+		parts := strings.Split(payload, ":")
+		AddPeer(parts[0], parts[1], parts[2], false)
 	default:
 		fmt.Printf("Peer: %s, Sent a message with kind of: %d", p.key, m.Kind)
 	}

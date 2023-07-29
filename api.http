@@ -3,7 +3,7 @@ http://localhost:4000/
 POST http://localhost:3000/blocks
 Content-Type: application/json
 ###
- http://localhost:4000/blocks
+ http://localhost:5000/blocks
 ###
  http://localhost:3000/blocks
 ###
@@ -11,7 +11,7 @@ http://localhost:4000/blocks/295fbf0bdf7df12a4f1bf2d9a55a5de294fad91588473c2353a
 ###
 http://localhost:3000/status
 ###
-POST http://localhost:3000/transactions
+POST http://localhost:5000/transactions
 Content-Type: application/json
 
 {
@@ -33,14 +33,18 @@ http://localhost:4000/balance/daad332c1eb5ffbbf2e315afb59585fcbc51a2fba30c4e0b55
 ###
 http://localhost:4000/balance/lynn
 ###
-POST http://localhost:4000/peers
+POST http://localhost:2000/peers
 Content-Type: application/json
 
 {
 "address":"127.0.0.1",
-"port": "3000"
+"port": "5000"
 }
+###
+http://localhost:5000/peers
 ###
 http://localhost:4000/peers
 ###
 http://localhost:3000/peers
+###
+http://localhost:2000/peers
