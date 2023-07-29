@@ -189,16 +189,25 @@ func (b *blockchain) Replace(newBlocks []*Block) {
 	}
 }
 
-func (b *blockchain) AddPeerBlock(block *Block) {
+func (b *blockchain) AddPeerBlock(newBlock *Block) {
 	b.m.Lock()
+	m.m.Lock()
 	defer b.m.Unlock()
+	defer m.m.Unlock()
 
 	b.Height += 1
-	b.CurrentDifficulty = block.Difficulty
-	b.NewestHash = block.Hash
+	b.CurrentDifficulty = newBlock.Difficulty
+	b.NewestHash = newBlock.Hash
 
 	persistBlockchain(b)
-	persistBlock(block)
+	persistBlock(newBlock)
 
-	// mempool
+	// mempool에 있는 것 중에 적용된 트랜잭션을 삭제
+	for _, tx := range newBlock.Transactions {
+		_, ok := m.Txs[tx.ID]
+		if ok {
+			delete(m.Txs, tx.ID)
+		}
+
+	}
 }
