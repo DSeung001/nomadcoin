@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -90,5 +91,36 @@ func TestHandleErr(t *testing.T) {
 
 	if !called {
 		t.Error("HandleError should call fn")
+	}
+}
+
+func TestFromBytes(t *testing.T) {
+	type testStrcut struct {
+		Test string
+	}
+
+	var restored testStrcut
+	ts := testStrcut{"test"}
+	b := ToBytes(ts)
+	FromBytes(&restored, b)
+
+	if !reflect.DeepEqual(ts, restored) {
+		t.Error("FromBytes() should restore struct")
+	}
+}
+
+func TestToJSON(t *testing.T) {
+	type testStruct struct{ Test string }
+	s := testStruct{"test"}
+	b := ToJSON(s)
+	k := reflect.TypeOf(b).Kind()
+	if k != reflect.Slice {
+		t.Errorf("Expected %v and got %v", reflect.Slice, k)
+	}
+
+	var restored testStruct
+	json.Unmarshal(b, &restored)
+	if !reflect.DeepEqual(s, restored) {
+		t.Error("ToJson() should restore struct")
 	}
 }
