@@ -13,6 +13,9 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/nsf/termbox-go v1.1.1 // indirect
+	github.com/yuin/goldmark v1.4.13 // indirect
 	go.etcd.io/bbolt v1.3.7 // indirect
-	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/mod v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/tools v0.11.0 // indirect
 )
