@@ -2,3 +2,4 @@
 *.db
 *.db.lock
 nomadcoin.wallet
+*.out
