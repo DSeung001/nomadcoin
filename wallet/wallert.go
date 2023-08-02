@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/nomadcoders/nomadcoin/utils"
+	"io/fs"
 	"math/big"
 	"os"
 )
@@ -16,17 +17,38 @@ const (
 	fileName string = "nomadcoin.wallet"
 )
 
+type fileLayer interface {
+	hasWalletFile() bool
+	writeFile(name string, data []byte, perm fs.FileMode) error
+	readFile(name string) ([]byte, error)
+}
+
+// Go에서 interface는 자동으로 찾아줌
+// Interface로 선언해서 테스팅하기 위함 => 독립성 증가
+type layer struct {
+}
+
+func (layer) hasWalletFile() bool {
+	_, err := os.Stat(fileName)
+	return !os.IsNotExist(err)
+}
+
+func (layer) writeFile(name string, data []byte, perm fs.FileMode) error {
+	return os.WriteFile(name, data, perm)
+}
+
+func (layer) readFile(name string) ([]byte, error) {
+	return os.ReadFile(fileName)
+}
+
+var files fileLayer = layer{}
+
 type wallet struct {
 	privateKey *ecdsa.PrivateKey
 	Address    string
 }
 
 var w *wallet
-
-func hasWalletFile() bool {
-	_, err := os.Stat(fileName)
-	return !os.IsNotExist(err)
-}
 
 func createPrivKey() *ecdsa.PrivateKey {
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -37,14 +59,14 @@ func createPrivKey() *ecdsa.PrivateKey {
 func persistKey(key *ecdsa.PrivateKey) {
 	bytes, err := x509.MarshalECPrivateKey(key)
 	utils.HandleErr(err)
-	err = os.WriteFile(fileName, bytes, 06444)
+	err = files.writeFile(fileName, bytes, 0644)
 	utils.HandleErr(err)
 }
 
 // named return 으로 key 반환, 코드가 보기 어려워지므로 싫어하기도 함
 // 문서에서는 짧은 func에서는 사용하길 권함
 func restoreKey() (key *ecdsa.PrivateKey) {
-	keyAsBytes, err := os.ReadFile(fileName)
+	keyAsBytes, err := files.readFile(fileName)
 	utils.HandleErr(err)
 	key, err = x509.ParseECPrivateKey(keyAsBytes)
 	utils.HandleErr(err)
@@ -106,7 +128,7 @@ func Verify(signature, payload, address string) bool {
 func Wallet() *wallet {
 	if w == nil {
 		w = &wallet{}
-		if hasWalletFile() {
+		if files.hasWalletFile() {
 			w.privateKey = restoreKey()
 		} else {
 			key := createPrivKey()
