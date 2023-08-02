@@ -21,10 +21,37 @@ func makeTestWallet() *wallet {
 	return w
 }
 
-func TestVerify(t *testing.T) {
+func TestSign(t *testing.T) {
 	s := Sign(testPayload, makeTestWallet())
 	_, err := hex.DecodeString(s)
 	if err != nil {
 		t.Errorf("Sign() should return a hex encoded string, got %s", s)
+	}
+}
+
+func TestVerify(t *testing.T) {
+	type test struct {
+		input string
+		ok    bool
+	}
+
+	tests := []test{
+		{testPayload, true},
+		{"04bff541d78c5a152fa7a3dbd9ac581d99bacc3c629a02dabe6347f064701964", false},
+	}
+
+	for _, tc := range tests {
+		w := makeTestWallet()
+		ok := Verify(testSig, tc.input, w.Address)
+		if ok != tc.ok {
+			t.Error("Verify() could not verify testSignature and testPayload")
+		}
+	}
+}
+
+func TestRestoreBigInts(t *testing.T) {
+	_, _, err := restoreBigInts("xx")
+	if err == nil {
+		t.Error("restoreBigInts should return error and when payload is not hex.")
 	}
 }
