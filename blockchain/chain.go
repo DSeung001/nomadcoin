@@ -26,17 +26,20 @@ type blockchain struct {
 }
 
 type storage interface {
-	findBlock(hash string) []byte
-	saveBlock(hash string, data []byte)
-	saveChain(data []byte)
-	loadChain() []byte
+	FindBlock(hash string) []byte
+	LoadChain() []byte
+	SaveBlock(hash string, data []byte)
+	SaveChain(data []byte)
+	DeleteAllBlocks()
 }
 
 // 5분
 
 var b *blockchain
 var once sync.Once
-var dbStorage storage
+
+// 어댑터 패턴
+var dbStorage storage = db.DB{}
 
 // Struct 를 변화시키는 거면 Receive Method 로 아니면 function 으로
 // 그리고 Receive Method 가 위로 아래는 function
@@ -55,7 +58,7 @@ func (b *blockchain) AddBlock() *Block {
 }
 
 func persistBlockchain(b *blockchain) {
-	dbStorage.saveChain(utils.ToBytes(b))
+	dbStorage.SaveChain(utils.ToBytes(b))
 }
 
 func Blocks(b *blockchain) []*Block {
@@ -170,7 +173,7 @@ func Blockchain() *blockchain {
 		b = &blockchain{
 			Height: 0,
 		}
-		checkpoint := dbStorage.loadChain()
+		checkpoint := dbStorage.LoadChain()
 		if checkpoint == nil {
 			b.AddBlock()
 		} else {
@@ -193,7 +196,7 @@ func (b *blockchain) Replace(newBlocks []*Block) {
 	b.Height = len(newBlocks)
 	b.NewestHash = newBlocks[0].Hash
 	persistBlockchain(b)
-	db.EmptyBlocks()
+	dbStorage.DeleteAllBlocks()
 	for _, block := range newBlocks {
 		persistBlock(block)
 	}

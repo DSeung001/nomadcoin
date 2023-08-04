@@ -18,11 +18,11 @@ type Block struct {
 }
 
 func (b *Block) persist() {
-	dbStorage.saveBlock(b.Hash, utils.ToBytes(b))
+	dbStorage.SaveBlock(b.Hash, utils.ToBytes(b))
 }
 
 func persistBlock(b *Block) {
-	dbStorage.saveBlock(b.Hash, utils.ToBytes(b))
+	dbStorage.SaveBlock(b.Hash, utils.ToBytes(b))
 }
 
 var ErrNotFound = errors.New("block not found")
@@ -33,7 +33,7 @@ func (b *Block) restore(data []byte) {
 
 // FindBlock : 해시로 블록 찾기
 func FindBlock(hash string) (*Block, error) {
-	blockBytes := dbStorage.findBlock(hash)
+	blockBytes := dbStorage.FindBlock(hash)
 	if blockBytes == nil {
 		return nil, ErrNotFound
 	}
