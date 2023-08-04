@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"errors"
-	"github.com/nomadcoders/nomadcoin/db"
 	"github.com/nomadcoders/nomadcoin/utils"
 	"strings"
 	"time"
@@ -19,11 +18,11 @@ type Block struct {
 }
 
 func (b *Block) persist() {
-	db.SaveBlock(b.Hash, utils.ToBytes(b))
+	dbStorage.saveBlock(b.Hash, utils.ToBytes(b))
 }
 
 func persistBlock(b *Block) {
-	db.SaveBlock(b.Hash, utils.ToBytes(b))
+	dbStorage.saveBlock(b.Hash, utils.ToBytes(b))
 }
 
 var ErrNotFound = errors.New("block not found")
@@ -34,7 +33,7 @@ func (b *Block) restore(data []byte) {
 
 // FindBlock : 해시로 블록 찾기
 func FindBlock(hash string) (*Block, error) {
-	blockBytes := db.Block(hash)
+	blockBytes := dbStorage.findBlock(hash)
 	if blockBytes == nil {
 		return nil, ErrNotFound
 	}
@@ -65,10 +64,10 @@ func createBlock(prevHash string, height, diff int) *Block {
 		Difficulty: diff,
 		Nonce:      0,
 	}
-	// 해시
-	block.mine()
 	// Memory pool transaction 승인작업 => 검증
 	block.Transactions = Mempool().TxToConfirm()
+	// 해시
+	block.mine()
 	block.persist()
 	return block
 }
