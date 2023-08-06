@@ -100,7 +100,7 @@ func recalculateDifficulty(b *blockchain) int {
 	allBlocks := Blocks(b)
 	newestBlock := allBlocks[0]
 
-	// 아래 코드 이해가 안감 왜 difficultyInterval-1 을 하는거지
+	// interval 이 5면 가르키는 인덱스 값은 4이기에 -1
 	lastRecalculatedBlock := allBlocks[difficultyInterval-1]
 	actualTime := (newestBlock.Timestamp / 60) - (lastRecalculatedBlock.Timestamp / 60)
 	expectedTime := difficultyInterval * blockInterval
