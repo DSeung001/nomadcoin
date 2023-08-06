@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"github.com/nomadcoders/nomadcoin/utils"
+	"reflect"
 	"sync"
 	"testing"
 )
@@ -54,6 +55,76 @@ func TestBlockchain(t *testing.T) {
 		if bc.Height != 2 {
 			// b.AddBlock Test
 			t.Errorf("Blockchain() should restore a blockchain with a height of %d, got %d", 2, bc.Height)
+
+		}
+	})
+}
+
+func TestBlocks(t *testing.T) {
+	fakeBlock := 0
+	dbStorage = fakeDB{
+		fakeFindBlock: func() []byte {
+			var b *Block
+			if fakeBlock == 0 {
+				b = &Block{
+					Height:   2,
+					PrevHash: "x",
+				}
+			} else if fakeBlock == 1 {
+				b = &Block{
+					Height: 1,
+				}
+			}
+			fakeBlock++
+
+			return utils.ToBytes(b)
+		},
+	}
+
+	bc := &blockchain{}
+	blocks := Blocks(bc)
+	if reflect.TypeOf(blocks) != reflect.TypeOf([]*Block{}) {
+		t.Error("Blocks() should return a slice of return")
+	}
+}
+
+func TestFindTx(t *testing.T) {
+	t.Run("Tx not found", func(t *testing.T) {
+		dbStorage = fakeDB{
+			fakeFindBlock: func() []byte {
+				b := &Block{
+					Height:       2,
+					Transactions: []*Tx{},
+				}
+
+				return utils.ToBytes(b)
+			},
+		}
+
+		tx := FindTx(&blockchain{NewestHash: "x"}, "test")
+		if tx != nil {
+			t.Error("Tx Should be not found")
+
+		}
+	})
+
+	t.Run("Tx should be found", func(t *testing.T) {
+		dbStorage = fakeDB{
+			fakeFindBlock: func() []byte {
+				b := &Block{
+					Height: 2,
+					Transactions: []*Tx{
+						{ID: "test"},
+					},
+				}
+
+				return utils.ToBytes(b)
+			},
+		}
+
+		tx := FindTx(&blockchain{NewestHash: "x"}, "test")
+		if tx == nil {
+			t.Error("Tx Should be found")
 
 		}
 	})
